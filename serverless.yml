@@ -8,5 +8,5 @@ provider:
   region: us-west-1
 
 functions:
-  hello:
-    handler: dist/index.handler
+  authenticate:
+    handler: dist/index.authenticate
