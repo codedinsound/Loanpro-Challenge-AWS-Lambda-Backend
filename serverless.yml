@@ -1,0 +1,12 @@
+service: loanpro-challenge-aws-lambda-backend
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-west-1
+
+functions:
+  hello:
+    handler: dist/index.handler

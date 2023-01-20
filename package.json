@@ -1,0 +1,12 @@
+{
+  "name": "loanpro-challenge-aws-lambda-backend",
+  "description": "",
+  "scripts": {
+
+  },
+  "author": {"name": "Luis M. Santander", "email": "codedinsound@gmail.com"},
+  "dependencies": {
+    "express": "^4.18.2",
+    "typescript": "^4.9.4"
+  }
+}
