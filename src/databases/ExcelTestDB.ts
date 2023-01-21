@@ -67,6 +67,24 @@ class ExcelSheetTestDatabase implements Database {
         newBalance = +nb; 
 
         console.log(userID, newBalance); 
+
+        const userBalances = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[1]]);
+
+        userBalances.forEach((user: any) => {
+            if (user.user_id === userID) {
+                user.balance = newBalance; 
+                return; 
+            }
+        }); 
+
+        const ws = XLSX.utils.json_to_sheet(userBalances);
+
+
+        this.workbook.Sheets[this.sheetNames[1]] = ws;
+
+        // Write out to the Excel Test Database 
+        XLSX.writeFile(this.workbook, __dirname + '/test-data/users_db.xlsx'); 
+
     }
 
 
@@ -89,7 +107,7 @@ class ExcelSheetTestDatabase implements Database {
                 case "AUTH":
                     response = this.findUser(params[1], params[2])
                 break; 
-                case 'BALANCE':
+                case 'GET_BALANCE':
                     response = this.getBalance(params[2]); 
                 break; 
                 case 'UPDATE_BALANCE':

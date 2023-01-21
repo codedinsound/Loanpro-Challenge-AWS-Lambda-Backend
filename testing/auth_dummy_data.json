@@ -1,4 +1,18 @@
-{
-    "u": "luissantanderdev@gmail.com",
-    "p": "7902a95978eac488ee86b560c2d9f17e82d3c66a86068c30fe488cc8e4edea0e"
-}
+[
+    {
+        "u": "luissantanderdev@gmail.com",
+        "p": "7902a95978eac488ee86b560c2d9f17e82d3c66a86068c30fe488cc8e4edea0e"
+    }, 
+    {
+        "u": "invalid user id test",
+        "p": "totally wrong password"
+    },
+    {
+        "u": "luissantanderdev@gmail.com",
+        "p": "1"
+    }, 
+    {
+        "u": "inactiveaccounttest@gmail.com",
+        "p": "abc123"
+    }
+]
