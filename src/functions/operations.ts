@@ -1,6 +1,7 @@
 import { DatabaseManagerController } from '../controllers';
 import { Database, ExcelSheetTestDatabase } from '../database_logic'; 
 import { MAX_LIMIT } from '../models';
+import { createArithmeticRecord } from './record_keeping_functions';
 
 // MARK: Process Arithmetic Operation
 function runArithemticOperation(operation: string, balance: number, cost: number): number {
@@ -80,11 +81,10 @@ function processUserOperation(data: any) {
     }
 
     let res: string = JSON.stringify(response).replace(' ', '-'); 
-
-    console.log(res);
-
     // Create an Arithmetic Record
-    database.query(`CREATE_RECORD USER= ${userID} OPERATION= ${operation} RES= ${res} AMOUNT= ${cost} USER_BALANCE= ${newBalance}`);
+    // database.query(`CREATE_RECORD USER= ${userID} OPERATION= ${operation} RES= ${res} AMOUNT= ${cost} USER_BALANCE= ${newBalance}`);
+
+    createArithmeticRecord(userID, operation, res, cost, newBalance, database); 
 
     return response; 
 }

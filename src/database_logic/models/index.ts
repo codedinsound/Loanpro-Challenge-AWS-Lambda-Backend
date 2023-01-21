@@ -2,7 +2,6 @@
 interface Database {
     connect(): void 
     disconnect(): void 
-
     query(q: string): any
 }
 
