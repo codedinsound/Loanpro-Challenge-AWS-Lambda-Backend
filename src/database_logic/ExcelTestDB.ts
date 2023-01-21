@@ -1,5 +1,5 @@
 const XLSX = require('xlsx'); 
-import { Database } from "../models";
+import { Database } from './models';
 
 class ExcelSheetTestDatabase implements Database {
     private workbook: any;

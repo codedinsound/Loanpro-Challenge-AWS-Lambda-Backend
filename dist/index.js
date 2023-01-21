@@ -9,69 +9,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.retrieveUserOperationsRecord = exports.operations = exports.authenticate = void 0;
-const databases_1 = require("./databases");
+exports.operations = exports.authenticate = void 0;
+const utils_1 = require("./utils");
+const functions_1 = require("./functions");
 const enviroment = process.env.NODE_ENV || 'production';
-const PORT = process.env.PORT || '';
 console.log(`Current Enviroment Set: ${enviroment}`);
-function generateTestHashToStoreInDB() {
-    const crypto = require('crypto');
-    const secret = 'abc123456';
-    const hash = crypto.createHmac('sha256', secret)
-        .update('some data to be hashed')
-        .digest('hex');
-    console.log(hash);
-    return "";
-}
-function generateToken(response, p, database) {
-    if (response.error)
-        return { error: response.error };
-    if (response.password !== p)
-        return { error: "Wrong Password!" };
-    if (response.status === 'inactive')
-        return { error: "User account is locked" };
-    // Get Users Balance 
-    console.log('generate token: ', response);
-    return {
-        status: 'active',
-        date: new Date(),
-        balance: 1,
-        userID: response.id,
-        username: response.username
-    };
-}
-function aunthicateUser(data) {
-    const { DatabaseManagerController } = require('./controllers');
-    const database = DatabaseManagerController.instance();
-    database.setDatabase(new databases_1.ExcelSheetTestDatabase());
-    database.connect();
-    let response = database.query(`AUTH ${data.u} ${data.p}`);
-    database.disconnect();
-    return generateToken(response, data.p, database);
-}
 // AWS LAMBDA FUNCTIONS
 // ==========================================================================================================
 // MARK: Authenticate User Lambda
 const authenticate = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = aunthicateUser(event);
-    const response = {
-        statusCode: 200,
-        headers: {
-            "x-custom-header": "User Authenticated"
-        },
-        body: JSON.stringify(token)
-    };
-    return response;
+    const token = (0, functions_1.authenticateUser)(event);
+    let res = utils_1.LambdaResponseGenerator.respond(200, 'User Authenticated', token);
+    return res;
 });
 exports.authenticate = authenticate;
 // MARK: Operations Handler Lambda
 const operations = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(event);
+    const token = (0, functions_1.processUserOperation)(event);
+    let res = utils_1.LambdaResponseGenerator.respond(200, 'Operation Handled', token);
+    return res;
 });
 exports.operations = operations;
-// MARK: Retrieves Users Operation Records Record of User
-const retrieveUserOperationsRecord = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(event);
-});
-exports.retrieveUserOperationsRecord = retrieveUserOperationsRecord;
+// // MARK: Retrieves Users Operation Records Record of User
+// export const retrieveUserOperationsRecord = async(event: any, context: any) => {
+//     console.log(event); 
+// }; 
 //# sourceMappingURL=index.js.map

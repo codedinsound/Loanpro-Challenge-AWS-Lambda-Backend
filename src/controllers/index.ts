@@ -1,5 +1,4 @@
-import { Database } from "../models";
-
+import { Database } from "../database_logic";
 
 // MARK: Database Manager Controller 
 class DatabaseManagerController {
