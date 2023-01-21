@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authenticate = void 0;
+exports.retrieveUserOperationsRecord = exports.operations = exports.authenticate = void 0;
 const databases_1 = require("./databases");
 const enviroment = process.env.NODE_ENV || 'production';
 const PORT = process.env.PORT || '';
@@ -23,14 +23,19 @@ function generateTestHashToStoreInDB() {
     console.log(hash);
     return "";
 }
-function generateToken(response, p) {
+function generateToken(response, p, database) {
+    if (response.error)
+        return { error: response.error };
     if (response.password !== p)
         return { error: "Wrong Password!" };
     if (response.status === 'inactive')
         return { error: "User account is locked" };
+    // Get Users Balance 
+    console.log('generate token: ', response);
     return {
         status: 'active',
         date: new Date(),
+        balance: 1,
         userID: response.id,
         username: response.username
     };
@@ -41,12 +46,9 @@ function aunthicateUser(data) {
     database.setDatabase(new databases_1.ExcelSheetTestDatabase());
     database.connect();
     let response = database.query(`AUTH ${data.u} ${data.p}`);
-    if (response.error)
-        console.log('send the error', response);
     database.disconnect();
-    return generateToken(response, data.p);
+    return generateToken(response, data.p, database);
 }
-// if (enviroment === "development") app.listen(PORT, () => console.log(`Listening on Local Port: ${PORT}`)) ;
 // AWS LAMBDA FUNCTIONS
 // ==========================================================================================================
 // MARK: Authenticate User Lambda
@@ -62,4 +64,14 @@ const authenticate = (event, context) => __awaiter(void 0, void 0, void 0, funct
     return response;
 });
 exports.authenticate = authenticate;
+// MARK: Operations Handler Lambda
+const operations = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(event);
+});
+exports.operations = operations;
+// MARK: Retrieves Users Operation Records Record of User
+const retrieveUserOperationsRecord = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(event);
+});
+exports.retrieveUserOperationsRecord = retrieveUserOperationsRecord;
 //# sourceMappingURL=index.js.map

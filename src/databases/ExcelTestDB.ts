@@ -43,6 +43,34 @@ class ExcelSheetTestDatabase implements Database {
         console.log("disconnecting from excel test db"); 
     }
 
+    getBalance(user_id: string) {
+        console.log(+user_id);
+        const userBalances = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[1]]);
+
+        let balance: number = -1;
+
+        userBalances.forEach((user: any) => {
+            if (user.user_id === +user_id) {
+                balance = user.balance; 
+                return; 
+            }
+
+        }); 
+
+        return balance; 
+    }
+
+    updateBalance(uid: string, nb: string) {
+        let userID: number, newBalance: number; 
+
+        userID = +uid; 
+        newBalance = +nb; 
+
+        console.log(userID, newBalance); 
+    }
+
+
+
     // MARK: Query the database 
     query(q: string): void {
         console.log("quering the database"); 
@@ -51,13 +79,21 @@ class ExcelSheetTestDatabase implements Database {
 
         let response: any = null; 
 
-        if (params.length === 3) {
+        console.log(params);
+
+        if (params.length >= 3) {
             
             const command = params[0]; 
             
             switch (command) {
                 case "AUTH":
                     response = this.findUser(params[1], params[2])
+                break; 
+                case 'BALANCE':
+                    response = this.getBalance(params[2]); 
+                break; 
+                case 'UPDATE_BALANCE':
+                    response = this.updateBalance(params[2], params[4]); 
                 break; 
                 default: 
             }

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseManagerController = void 0;
+// MARK: Database Manager Controller 
 class DatabaseManagerController {
     constructor() {
     }

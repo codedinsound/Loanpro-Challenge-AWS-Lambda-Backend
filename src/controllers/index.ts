@@ -1,5 +1,7 @@
 import { Database } from "../models";
 
+
+// MARK: Database Manager Controller 
 class DatabaseManagerController {
     private database: any;
 
