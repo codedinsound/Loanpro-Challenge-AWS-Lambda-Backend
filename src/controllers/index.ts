@@ -15,7 +15,7 @@ class DatabaseManagerController {
         this.database.disconnect(); 
     }
 
-    query(q: string): void {
+    query(q: string): any {
 
         let res: any; 
         try {
@@ -34,8 +34,9 @@ class DatabaseManagerController {
         return new DatabaseManagerController(); 
    }
 
-   setDatabase(database: Database) {
+   setDatabase(database: Database): Database {
         this.database = database; 
+        return this; 
    }
 }
 

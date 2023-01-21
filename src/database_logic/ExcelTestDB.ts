@@ -87,10 +87,33 @@ class ExcelSheetTestDatabase implements Database {
 
     }
 
+    createNewArithmeticRecord(params: any): any {
+        console.log("ExcelTestDB.ts - 91: Creating new Record");
+        const records = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[2]]);
 
+        const newRecord = {
+            id: `${params[2]}-${records.length + 1}`, 
+            operation_id: params[4],
+            user_id: +params[2], 
+            amount: +params[8],
+            user_balance: +params[10],
+            operation_response: params[6],
+            date: `${new Date()}`
+        }
+
+        records.push(newRecord); 
+
+        const updatedWS = XLSX.utils.json_to_sheet(records); 
+
+        this.workbook.Sheets[this.sheetNames[2]] = updatedWS; 
+
+        XLSX.writeFile(this.workbook, __dirname + '/test-data/users_db.xlsx'); 
+
+        return {}
+    }
 
     // MARK: Query the database 
-    query(q: string): void {
+    query(q: string): any {
         console.log("quering the database"); 
 
         let params = q.split(' '); 
@@ -113,6 +136,9 @@ class ExcelSheetTestDatabase implements Database {
                 case 'UPDATE_BALANCE':
                     response = this.updateBalance(params[2], params[4]); 
                 break; 
+                case 'CREATE_RECORD':
+                    response = this.createNewArithmeticRecord(params);
+                break;
                 default: 
             }
         }

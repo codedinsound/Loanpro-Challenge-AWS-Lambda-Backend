@@ -1,6 +1,31 @@
-import { ExcelSheetTestDatabase } from '../database_logic'; 
+import { DatabaseManagerController } from '../controllers';
+import { Database, ExcelSheetTestDatabase } from '../database_logic'; 
+import { MAX_LIMIT } from '../models';
 
-const MAX_LIMIT = 10E9; 
+// MARK: Process Arithmetic Operation
+function runArithemticOperation(operation: string, balance: number, cost: number): number {
+
+    switch(operation) {
+        case 'ADD':
+            balance = balance + cost; 
+        break; 
+        case 'SUBTRACT':
+            balance -= cost; 
+        break;
+        case 'MULTIPLY':
+            balance *= cost; 
+        break; 
+        case 'DIVIDE':
+            balance /= cost; 
+        break;
+        case 'SQUAREROOT':
+            balance = Math.sqrt(balance); 
+        break; 
+        default:
+    }
+
+    return balance; 
+}
 
 // MARK: Check if the Operation is Valid
 function checkIfOperationIsValid(operation: string, balance: number, cost: number): string {
@@ -29,56 +54,39 @@ function checkIfOperationIsValid(operation: string, balance: number, cost: numbe
     return isValid; 
 }
 
-// MARK: Process Arithmetic Operation
-function runArithemticOperation(operation: string, balance: number, cost: number): number {
-
-    switch(operation) {
-        case 'ADD':
-            balance += cost; 
-        break; 
-        case 'SUBTRACT':
-            balance -= cost; 
-        break;
-        case 'MULTIPLY':
-            balance *= cost; 
-        break; 
-        case 'DIVIDE':
-            balance /= cost; 
-        break;
-        case 'SQUAREROOT':
-            balance = Math.sqrt(balance); 
-        break; 
-        default:
-    }
-
-    return balance; 
-}
-
 // MARK: Process User Operation 
 function processUserOperation(data: any) {
-    const { DatabaseManagerController } = require('./controllers'); 
+    let prevBalance: number, newBalance: number, isValid: string; 
+
     const database = DatabaseManagerController.instance(); 
+    database.setDatabase(new ExcelSheetTestDatabase()).connect();
 
-    database.setDatabase(new ExcelSheetTestDatabase())
-    database.connect();
+    const { userID, operation, cost } = data; 
     
-    let balance = database.query(`GET_BALANCE USER= ${data.userID}`);
-
-    const operation = data.operation; 
-
-    let isValid: string = checkIfOperationIsValid(operation, balance, data.cost); 
+    prevBalance = database.query(`GET_BALANCE USER= ${userID}`);
+    isValid = checkIfOperationIsValid(operation, prevBalance, cost); 
 
     if (isValid.length > 0) return { status: 'error', error: isValid }
 
-    balance = runArithemticOperation(operation, balance, data.cost); 
+    newBalance = runArithemticOperation(operation, prevBalance, data.cost); 
 
-    // database.query(`UPDATE_BALANCE USER= ${data.userID} BALANCE= ${balance}`);
+    // Update User Balance
+    database.query(`UPDATE_BALANCE USER= ${userID} BALANCE= ${newBalance}`);
 
-    return {
+    const response = {
         status: 'balance updated',
         date: new Date(),
-        balance
+        balance: newBalance
     }
+
+    let res: string = JSON.stringify(response).replace(' ', '-'); 
+
+    console.log(res);
+
+    // Create an Arithmetic Record
+    database.query(`CREATE_RECORD USER= ${userID} OPERATION= ${operation} RES= ${res} AMOUNT= ${cost} USER_BALANCE= ${newBalance}`);
+
+    return response; 
 }
 
 
