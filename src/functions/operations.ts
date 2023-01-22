@@ -56,15 +56,15 @@ function checkIfOperationIsValid(operation: string, balance: number, cost: numbe
 }
 
 // MARK: Process User Operation 
-function processUserOperation(data: any) {
+async function processUserOperation(data: any) {
     let prevBalance: number, newBalance: number, isValid: string; 
 
     const database = DatabaseManagerController.instance(); 
-    database.setDatabase(new ExcelSheetTestDatabase()).connect();
+    await database.setDatabase(new ExcelSheetTestDatabase()).connect();
 
     const { userID, operation, cost } = data; 
     
-    prevBalance = database.query(`GET_BALANCE USER= ${userID}`);
+    prevBalance = await database.query(`GET_BALANCE USER= ${userID}`);
     isValid = checkIfOperationIsValid(operation, prevBalance, cost); 
 
     if (isValid.length > 0) return { status: 'error', error: isValid }
@@ -72,7 +72,7 @@ function processUserOperation(data: any) {
     newBalance = runArithemticOperation(operation, prevBalance, data.cost); 
 
     // Update User Balance
-    database.query(`UPDATE_BALANCE USER= ${userID} BALANCE= ${newBalance}`);
+    await database.query(`UPDATE_BALANCE USER= ${userID} BALANCE= ${newBalance}`);
 
     const response = {
         status: 'balance updated',
@@ -82,7 +82,7 @@ function processUserOperation(data: any) {
 
     let res: string = JSON.stringify(response).replace(' ', '-'); 
     // Create an Arithmetic Record
-    // database.query(`CREATE_RECORD USER= ${userID} OPERATION= ${operation} RES= ${res} AMOUNT= ${cost} USER_BALANCE= ${newBalance}`);
+    await database.query(`CREATE_RECORD USER= ${userID} OPERATION= ${operation} RES= ${res} AMOUNT= ${cost} USER_BALANCE= ${newBalance}`);
 
     createArithmeticRecord(userID, operation, res, cost, newBalance, database); 
 

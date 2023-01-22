@@ -4,7 +4,7 @@ class LambdaResponseGenerator {
         const response = {
             statusCode,
             headers: {
-                "x-custom-header" : "User Authenticated"
+                "x-custom-header" : customHeader
             },
             body: JSON.stringify(data)
         }

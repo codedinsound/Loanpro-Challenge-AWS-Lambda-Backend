@@ -10,8 +10,8 @@ provider:
 functions:
   authenticate:
     handler: dist/index.authenticate
-  processUserArithmeticOperation:
+  processarithmetic:
     handler: dist/index.processUserArithmeticOperation
-  retrieveUserOperationsRecord:
+  retrieverecord:
     handler: dist/index.retrieveUserOperationsRecord
   

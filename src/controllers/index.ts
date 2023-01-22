@@ -7,15 +7,15 @@ class DatabaseManagerController {
     constructor() {
     }
 
-    connect(): void {
-        this.database.connect(); 
+    connect(): Promise<any> {
+        return this.database.connect(); 
     }
 
     disconnect(): void {
         this.database.disconnect(); 
     }
 
-    query(q: string): any {
+    query(q: string): Promise<any> {
 
         let res: any; 
         try {
@@ -27,7 +27,7 @@ class DatabaseManagerController {
             }
         }
 
-        return res; 
+        return new Promise((resolve) => resolve(res)); 
     }
 
    static instance(): DatabaseManagerController {

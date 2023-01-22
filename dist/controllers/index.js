@@ -6,7 +6,7 @@ class DatabaseManagerController {
     constructor() {
     }
     connect() {
-        this.database.connect();
+        return this.database.connect();
     }
     disconnect() {
         this.database.disconnect();
@@ -21,13 +21,14 @@ class DatabaseManagerController {
                 error: error.message
             };
         }
-        return res;
+        return new Promise((resolve) => resolve(res));
     }
     static instance() {
         return new DatabaseManagerController();
     }
     setDatabase(database) {
         this.database = database;
+        return this;
     }
 }
 exports.DatabaseManagerController = DatabaseManagerController;

@@ -2,12 +2,13 @@
   "name": "loanpro-challenge-aws-lambda-backend",
   "description": "",
   "scripts": {
+    "build": "tsc",
     "dev": "cls && nodemon",
     "deploy": "sls deploy",
-    "start": "serverless invoke local -f authenticate",
-    "start2": "serverless invoke local -f authenticate --path test1.json",
-    "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "test_auth": "tsc && serverless invoke local -f authenticate --path ./testing/serv1.json",
+    "test_operation": "serverless invoke local -f processUserArithmeticOperation --path ./testing/serv2.json",
+    "test_records": "serverless invoke local -f retrieveUserOperationsRecord --path ./testing/serv3.json"
   },
   "author": {
     "name": "Luis M. Santander",
@@ -16,6 +17,7 @@
   "dependencies": {
     "@types/jest": "^29.2.6",
     "@types/node": "^18.11.18",
+    "aws-sdk": "^2.1299.0",
     "typescript": "^4.9.4",
     "xlsx": "^0.18.5"
   },

@@ -1,14 +1,23 @@
 const XLSX = require('xlsx'); 
+const AWS = require('aws-sdk'); 
 import { Database } from './models';
+
+
+
+const s3Params = {
+    Bucket: "loanpro-challenge-aws-la-serverlessdeploymentbuck-1mo1bm3wp9e2s",
+    Key: "test-data/users_db.xlsx"
+}
 
 class ExcelSheetTestDatabase implements Database {
     private workbook: any;
     private sheetNames: any; 
     private db: any; 
+    private s3: any; 
 
     // MARK: Obtain user data if user on Dummy Excel Sheet Test DB 
     private findUser(username: string, password: string): any {
-        console.log(username, password);
+        // console.log(username, password);
         const db = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[0]]);
         
         let user: any = null; 
@@ -26,16 +35,25 @@ class ExcelSheetTestDatabase implements Database {
     }
 
     // MARK: Connect to the XLSX Dummy DB 
-    connect(): void {
+    async connect(): Promise<any> {
         console.log("connecting inside excel db"); 
 
         try {
-            this.workbook = XLSX.readFile(__dirname + '/test-data/users_db.xlsx');
+            this.s3 = new AWS.S3(); 
+
+            let res = await this.s3.getObject(s3Params).promise();
+
+            // this.workbook = XLSX.readFile(__dirname + '/test-data/users_db.xlsx');
+
+            this.workbook = XLSX.read(res.Body); 
             this.sheetNames = this.workbook.SheetNames;
+
         } catch (error) {
+            console.log(error); 
             console.log('database not found'); 
             this.disconnect(); 
         }
+
     }
 
     // MARK: Disconnect from the database 
@@ -44,7 +62,7 @@ class ExcelSheetTestDatabase implements Database {
     }
 
     getBalance(user_id: string) {
-        console.log(+user_id);
+        // console.log(+user_id);
         const userBalances = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[1]]);
 
         let balance: number = -1;
@@ -60,7 +78,7 @@ class ExcelSheetTestDatabase implements Database {
         return balance; 
     }
 
-    updateBalance(uid: string, nb: string) {
+    async updateBalance(uid: string, nb: string) {
         let userID: number, newBalance: number; 
 
         userID = +uid; 
@@ -82,12 +100,19 @@ class ExcelSheetTestDatabase implements Database {
 
         this.workbook.Sheets[this.sheetNames[1]] = ws;
 
+        const buffer = XLSX.write(this.workbook, {type: "buffer"}); 
+
+        await this.s3.putObject({
+            ...s3Params, 
+            Body: buffer 
+        }).promise(); 
+
         // Write out to the Excel Test Database 
-        XLSX.writeFile(this.workbook, __dirname + '/test-data/users_db.xlsx'); 
+        // XLSX.writeFile(this.workbook, __dirname + '/test-data/users_db.xlsx'); 
 
     }
 
-    createNewArithmeticRecord(params: any): any {
+    async createNewArithmeticRecord(params: any) {
         console.log("ExcelTestDB.ts - 91: Creating new Record");
         const records = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[2]]);
 
@@ -107,10 +132,25 @@ class ExcelSheetTestDatabase implements Database {
 
         this.workbook.Sheets[this.sheetNames[2]] = updatedWS; 
 
-        XLSX.writeFile(this.workbook, __dirname + '/test-data/users_db.xlsx'); 
+        // XLSX.writeFile(this.workbook, __dirname + '/test-data/users_db.xlsx'); 
+
+        const buffer = XLSX.write(this.workbook, {type: "buffer"}); 
+
+        await this.s3.putObject({
+            ...s3Params, 
+            Body: buffer 
+        }).promise(); 
 
         return {}
     }
+
+    // MARK: Retrieve User Records 
+    retrieveRecords(uid: string) {
+        const userID = +uid; 
+        const records = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[2]]);
+        const specificUserRecords = records.filter((item: any) => item.user_id === userID && item.flag != 'T');
+        return specificUserRecords; 
+    } 
 
     // MARK: Query the database 
     query(q: string): any {
@@ -125,7 +165,7 @@ class ExcelSheetTestDatabase implements Database {
         if (params.length >= 3) {
             
             const command = params[0]; 
-            
+                        
             switch (command) {
                 case "AUTH":
                     response = this.findUser(params[1], params[2])
@@ -139,6 +179,12 @@ class ExcelSheetTestDatabase implements Database {
                 case 'CREATE_RECORD':
                     response = this.createNewArithmeticRecord(params);
                 break;
+                case 'GET_USER_RECORDS':
+                    response = this.retrieveRecords(params[2]);
+                break;
+                case 'DELETE_SPECIFIC_RECORD':
+                    console.log("...");
+                break; 
                 default: 
             }
         }

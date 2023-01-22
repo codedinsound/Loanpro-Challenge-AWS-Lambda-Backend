@@ -9,29 +9,56 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.operations = exports.authenticate = void 0;
+exports.retrieveUserOperationsRecord = exports.processUserArithmeticOperation = exports.authenticate = void 0;
 const utils_1 = require("./utils");
 const functions_1 = require("./functions");
 const enviroment = process.env.NODE_ENV || 'production';
 console.log(`Current Enviroment Set: ${enviroment}`);
+// let test1 = {
+//     "u": "luissantanderdev@gmail.com",
+//     "p": "7902a95978eac488ee86b560c2d9f17e82d3c66a86068c30fe488cc8e4edea0e"
+// }
+// let test2 = {
+//     "userID": 1, 
+//     "operation": "ADD",
+//     "cost": 400
+// }
+// async function run() {
+//     let res; 
+//     res = await authenticateUser(test1)
+//     // res = await processUserOperation(test2); 
+//     console.log(res); 
+// }
+// run(); 
+// ==========================================================================================================
 // AWS LAMBDA FUNCTIONS
 // ==========================================================================================================
-// MARK: Authenticate User Lambda
+// MARK: Authenticate User Handler Lambda
 const authenticate = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = (0, functions_1.authenticateUser)(event);
-    let res = utils_1.LambdaResponseGenerator.respond(200, 'User Authenticated', token);
-    return res;
+    if (!event.body)
+        return utils_1.LambdaResponseGenerator.respond(400, 'No params received', { error: "no parameters received..." });
+    const body = JSON.parse(event.body);
+    const token = yield (0, functions_1.authenticateUser)(body);
+    return utils_1.LambdaResponseGenerator.respond(200, 'User Authenticated', token);
 });
 exports.authenticate = authenticate;
-// MARK: Operations Handler Lambda
-const operations = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = (0, functions_1.processUserOperation)(event);
-    let res = utils_1.LambdaResponseGenerator.respond(200, 'Operation Handled', token);
-    return res;
+// MARK: Process User Arithmetic Operation Handler Lambda
+const processUserArithmeticOperation = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!event.body)
+        return utils_1.LambdaResponseGenerator.respond(400, 'No params received', { error: "no parameters received..." });
+    const body = JSON.parse(event.body);
+    console.log(body);
+    const token = yield (0, functions_1.processUserOperation)(body);
+    return utils_1.LambdaResponseGenerator.respond(200, 'Operation Handled', token);
 });
-exports.operations = operations;
-// // MARK: Retrieves Users Operation Records Record of User
-// export const retrieveUserOperationsRecord = async(event: any, context: any) => {
-//     console.log(event); 
-// }; 
+exports.processUserArithmeticOperation = processUserArithmeticOperation;
+// MARK: Retrieves Users Operation Records Record of User
+const retrieveUserOperationsRecord = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!event.body)
+        return utils_1.LambdaResponseGenerator.respond(400, 'No params received', { error: "no parameters received..." });
+    const body = JSON.parse(event.body);
+    const token = yield (0, functions_1.getUserArithmeticRecords)(body);
+    return utils_1.LambdaResponseGenerator.respond(200, 'Records Retrieved', token);
+});
+exports.retrieveUserOperationsRecord = retrieveUserOperationsRecord;
 //# sourceMappingURL=index.js.map

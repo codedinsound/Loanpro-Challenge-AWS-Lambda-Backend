@@ -1,8 +1,8 @@
 // MARK: Database Model 
 interface Database {
-    connect(): void 
+    connect(): Promise<any> 
     disconnect(): void 
-    query(q: string): any
+    query(q: string): Promise<any>
 }
 
 
