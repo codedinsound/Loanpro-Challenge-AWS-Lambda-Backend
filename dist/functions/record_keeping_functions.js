@@ -22,7 +22,7 @@ function getUserArithmeticRecords(data) {
     return __awaiter(this, void 0, void 0, function* () {
         let response;
         const database = controllers_1.DatabaseManagerController.instance();
-        database.setDatabase(new database_logic_1.ExcelSheetTestDatabase()).connect();
+        yield database.setDatabase(new database_logic_1.ExcelSheetTestDatabase()).connect();
         const { userID, sessionToken } = data;
         if (!userID || !sessionToken)
             return { error: '' };

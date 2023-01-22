@@ -12,7 +12,7 @@ function createArithmeticRecord(userID: number, operation: string, res: string, 
 async function getUserArithmeticRecords(data: any) {
     let response: any; 
     const database = DatabaseManagerController.instance(); 
-    database.setDatabase(new ExcelSheetTestDatabase()).connect();
+    await database.setDatabase(new ExcelSheetTestDatabase()).connect();
 
     const { userID, sessionToken } = data; 
 
