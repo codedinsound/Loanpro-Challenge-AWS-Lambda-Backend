@@ -23,7 +23,7 @@ class ExcelSheetTestDatabase implements Database {
         let user: any = null; 
 
         db.forEach((userRecord: any) => {
-                if (userRecord.username === username) {
+                if (userRecord.username === username && userRecord.password === password) {
                         user = userRecord; 
                         return; 
                 }

@@ -7,7 +7,9 @@ class LambdaResponseGenerator {
         const response = {
             statusCode,
             headers: {
-                "x-custom-header": customHeader
+                "Access-Control-Allow-Origin": "*",
+                "x-custom-header": customHeader,
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(data)
         };

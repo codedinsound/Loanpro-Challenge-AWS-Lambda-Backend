@@ -36,7 +36,7 @@ console.log(`Current Enviroment Set: ${enviroment}`);
 // MARK: Authenticate User Handler Lambda
 const authenticate = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
     if (!event.body)
-        return utils_1.LambdaResponseGenerator.respond(400, 'No params received', { error: "no parameters received..." });
+        return utils_1.LambdaResponseGenerator.respond(404, 'No params received', { error: "no parameters received..." });
     const body = JSON.parse(event.body);
     const token = yield (0, functions_1.authenticateUser)(body);
     return utils_1.LambdaResponseGenerator.respond(200, 'User Authenticated', token);
@@ -45,7 +45,7 @@ exports.authenticate = authenticate;
 // MARK: Process User Arithmetic Operation Handler Lambda
 const processUserArithmeticOperation = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
     if (!event.body)
-        return utils_1.LambdaResponseGenerator.respond(400, 'No params received', { error: "no parameters received..." });
+        return utils_1.LambdaResponseGenerator.respond(404, 'No params received', { error: "no parameters received..." });
     const body = JSON.parse(event.body);
     console.log(body);
     const token = yield (0, functions_1.processUserOperation)(body);
@@ -55,7 +55,7 @@ exports.processUserArithmeticOperation = processUserArithmeticOperation;
 // MARK: Retrieves Users Operation Records Record of User
 const retrieveUserOperationsRecord = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
     if (!event.body)
-        return utils_1.LambdaResponseGenerator.respond(400, 'No params received', { error: "no parameters received..." });
+        return utils_1.LambdaResponseGenerator.respond(404, 'No params received', { error: "no parameters received..." });
     const body = JSON.parse(event.body);
     const token = yield (0, functions_1.getUserArithmeticRecords)(body);
     return utils_1.LambdaResponseGenerator.respond(200, 'Records Retrieved', token);
