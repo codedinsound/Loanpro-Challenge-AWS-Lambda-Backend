@@ -4,6 +4,10 @@ Author: Luis Santander
 
 # To See the Front End Application 
 
+"For more information, see the repository. https://stackblitz.com/edit/react-ts-wjmen9?file=README.md"
+
+# Application URL Without Stackblitz Code Editor Live Demo 
+
 "For more information, see the repository. https://react-ts-wjmen9.stackblitz.io"
 
 RESTful Calculator Front End
