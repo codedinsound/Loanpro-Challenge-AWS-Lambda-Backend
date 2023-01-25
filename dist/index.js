@@ -12,24 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.retrieveUserOperationsRecord = exports.processUserArithmeticOperation = exports.authenticate = void 0;
 const utils_1 = require("./utils");
 const functions_1 = require("./functions");
-const enviroment = process.env.NODE_ENV || 'production';
-console.log(`Current Enviroment Set: ${enviroment}`);
-// let test1 = {
-//     "u": "luissantanderdev@gmail.com",
-//     "p": "7902a95978eac488ee86b560c2d9f17e82d3c66a86068c30fe488cc8e4edea0e"
-// }
-// let test2 = {
-//     "userID": 1, 
-//     "operation": "ADD",
-//     "cost": 400
-// }
-// async function run() {
-//     let res; 
-//     res = await authenticateUser(test1)
-//     // res = await processUserOperation(test2); 
-//     console.log(res); 
-// }
-// run(); 
 // ==========================================================================================================
 // AWS LAMBDA FUNCTIONS
 // ==========================================================================================================
@@ -47,7 +29,6 @@ const processUserArithmeticOperation = (event, context) => __awaiter(void 0, voi
     if (!event.body)
         return utils_1.LambdaResponseGenerator.respond(404, 'No params received', { error: "no parameters received..." });
     const body = JSON.parse(event.body);
-    console.log(body);
     const token = yield (0, functions_1.processUserOperation)(body);
     return utils_1.LambdaResponseGenerator.respond(200, 'Operation Handled', token);
 });
