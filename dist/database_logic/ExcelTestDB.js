@@ -23,7 +23,7 @@ class ExcelSheetTestDatabase {
         const db = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[0]]);
         let user = null;
         db.forEach((userRecord) => {
-            if (userRecord.username === username) {
+            if (userRecord.username === username && userRecord.password === password) {
                 user = userRecord;
                 return;
             }
