@@ -1,8 +1,8 @@
 const XLSX = require('xlsx'); 
 const AWS = require('aws-sdk'); 
 import { Database } from './models';
-
-
+import { AsyncTimer } from '../utils';
+import { UserModel } from '../models';
 
 const s3Params = {
     Bucket: "loanpro-challenge-aws-la-serverlessdeploymentbuck-1mo1bm3wp9e2s",
@@ -12,14 +12,12 @@ const s3Params = {
 class ExcelSheetTestDatabase implements Database {
     private workbook: any;
     private sheetNames: any; 
-    private db: any; 
     private s3: any; 
 
     // MARK: Obtain user data if user on Dummy Excel Sheet Test DB 
-    private findUser(username: string, password: string): any {
-        // console.log(username, password);
+    private async findUser(username: string, password: string): Promise<UserModel> {
         const db = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[0]]);
-        
+
         let user: any = null; 
 
         db.forEach((userRecord: any) => {
@@ -29,6 +27,8 @@ class ExcelSheetTestDatabase implements Database {
                 }
         }); 
 
+        await AsyncTimer.sleep(500);
+
         if (!user) throw Error("User not found in excel sheet database"); 
         
         return user; 
@@ -36,16 +36,14 @@ class ExcelSheetTestDatabase implements Database {
 
     // MARK: Connect to the XLSX Dummy DB 
     async connect(): Promise<any> {
-        console.log("connecting inside excel db"); 
-
         try {
             this.s3 = new AWS.S3(); 
 
             let res = await this.s3.getObject(s3Params).promise();
 
-            // this.workbook = XLSX.readFile(__dirname + '/test-data/users_db.xlsx');
+            const buffer: Buffer = res.Body; 
 
-            this.workbook = XLSX.read(res.Body); 
+            this.workbook = XLSX.read(buffer); 
             this.sheetNames = this.workbook.SheetNames;
 
         } catch (error) {
@@ -53,7 +51,6 @@ class ExcelSheetTestDatabase implements Database {
             console.log('database not found'); 
             this.disconnect(); 
         }
-
     }
 
     // MARK: Disconnect from the database 
@@ -61,8 +58,8 @@ class ExcelSheetTestDatabase implements Database {
         console.log("disconnecting from excel test db"); 
     }
 
-    getBalance(user_id: string) {
-        // console.log(+user_id);
+    // MARK: Gets User Balance
+    private async getBalance(user_id: string) {
         const userBalances = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[1]]);
 
         let balance: number = -1;
@@ -72,12 +69,14 @@ class ExcelSheetTestDatabase implements Database {
                 balance = user.balance; 
                 return; 
             }
-
         }); 
+
+        await AsyncTimer.sleep(500);
 
         return balance; 
     }
 
+    // MARK: Updates User Balance 
     async updateBalance(uid: string, nb: string) {
         let userID: number, newBalance: number; 
 
@@ -97,7 +96,6 @@ class ExcelSheetTestDatabase implements Database {
 
         const ws = XLSX.utils.json_to_sheet(userBalances);
 
-
         this.workbook.Sheets[this.sheetNames[1]] = ws;
 
         const buffer = XLSX.write(this.workbook, {type: "buffer"}); 
@@ -106,10 +104,6 @@ class ExcelSheetTestDatabase implements Database {
             ...s3Params, 
             Body: buffer 
         }).promise(); 
-
-        // Write out to the Excel Test Database 
-        // XLSX.writeFile(this.workbook, __dirname + '/test-data/users_db.xlsx'); 
-
     }
 
     async createNewArithmeticRecord(params: any) {
@@ -132,8 +126,6 @@ class ExcelSheetTestDatabase implements Database {
 
         this.workbook.Sheets[this.sheetNames[2]] = updatedWS; 
 
-        // XLSX.writeFile(this.workbook, __dirname + '/test-data/users_db.xlsx'); 
-
         const buffer = XLSX.write(this.workbook, {type: "buffer"}); 
 
         await this.s3.putObject({
@@ -154,13 +146,8 @@ class ExcelSheetTestDatabase implements Database {
 
     // MARK: Query the database 
     query(q: string): any {
-        console.log("quering the database"); 
-
-        let params = q.split(' '); 
-
         let response: any = null; 
-
-        console.log(params);
+        const params: string[] = q.split(' '); 
 
         if (params.length >= 3) {
             
@@ -190,10 +177,8 @@ class ExcelSheetTestDatabase implements Database {
         }
 
         if (!response) throw Error("Invalid Query");  
-
         return response; 
     }
 }
-
 
 export { ExcelSheetTestDatabase }

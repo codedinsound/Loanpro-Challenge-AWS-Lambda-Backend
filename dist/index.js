@@ -26,6 +26,7 @@ const authenticate = (event, context) => __awaiter(void 0, void 0, void 0, funct
 exports.authenticate = authenticate;
 // MARK: Process User Arithmetic Operation Handler Lambda
 const processUserArithmeticOperation = (event, context) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(21, event);
     if (!event.body)
         return utils_1.LambdaResponseGenerator.respond(404, 'No params received', { error: "no parameters received..." });
     const body = JSON.parse(event.body);

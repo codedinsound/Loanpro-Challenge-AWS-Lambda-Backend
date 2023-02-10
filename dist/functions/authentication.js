@@ -12,31 +12,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticateUser = void 0;
 const controllers_1 = require("../controllers");
 const database_logic_1 = require("../database_logic");
-// MARK: Get a random interger from 0...n
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-}
+const utils_1 = require("../utils");
 // MARK: Genearte a session token
 function generateToken(response, p, database) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (response.error)
-            return { error: response.error };
-        if (response.password !== p)
-            return { error: "Wrong Password!" };
-        if (response.status === 'inactive')
-            return { error: "User account is inactive!" };
         // Get Users Balance 
         const balance = yield database.query(`GET_BALANCE USER= ${response.id}`);
-        let listOfTokens = ['abc1', 'abc2', 'abc3', 'abc4', 'abc5'];
+        const listOfTokens = ['abc1', 'abc2', 'abc3', 'abc4', 'abc5'];
+        yield utils_1.AsyncTimer.sleep(500);
         return {
             status: 'active',
             date: new Date(),
             balance,
             userID: response.id,
             username: response.username,
-            sessionToken: listOfTokens[getRandomInt(listOfTokens.length - 1)]
+            sessionToken: listOfTokens[utils_1.NumberGenerator.generate(listOfTokens.length - 1)]
         };
     });
+}
+// MARK: Check If There is Any Errors 
+function checkForErrorMessages(response, p) {
+    if (response.error)
+        return { error: response.error };
+    if (response.password !== p)
+        return { error: "Wrong Password!" };
+    if (response.status === 'inactive')
+        return { error: "User account is inactive!" };
+    return { error: '' };
 }
 // MARK: Authenticate User 
 function authenticateUser(data) {
@@ -44,10 +46,13 @@ function authenticateUser(data) {
         const database = controllers_1.DatabaseManagerController.instance();
         database.setDatabase(new database_logic_1.ExcelSheetTestDatabase());
         yield database.connect();
-        console.log("hello");
         const { u, p } = data;
-        let response = yield database.query(`AUTH ${u} ${p}`);
-        let token = generateToken(response, p, database);
+        const response = yield database.query(`AUTH ${u} ${p}`);
+        // Check For Any Error Reponse 
+        const { error } = checkForErrorMessages(response, p);
+        if (error.length > 0)
+            return error;
+        const token = yield generateToken(response, p, database);
         database.disconnect();
         return token;
     });

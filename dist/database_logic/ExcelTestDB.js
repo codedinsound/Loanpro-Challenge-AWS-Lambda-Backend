@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExcelSheetTestDatabase = void 0;
 const XLSX = require('xlsx');
 const AWS = require('aws-sdk');
+const utils_1 = require("../utils");
 const s3Params = {
     Bucket: "loanpro-challenge-aws-la-serverlessdeploymentbuck-1mo1bm3wp9e2s",
     Key: "test-data/users_db.xlsx"
@@ -19,28 +20,29 @@ const s3Params = {
 class ExcelSheetTestDatabase {
     // MARK: Obtain user data if user on Dummy Excel Sheet Test DB 
     findUser(username, password) {
-        // console.log(username, password);
-        const db = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[0]]);
-        let user = null;
-        db.forEach((userRecord) => {
-            if (userRecord.username === username && userRecord.password === password) {
-                user = userRecord;
-                return;
-            }
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[0]]);
+            let user = null;
+            db.forEach((userRecord) => {
+                if (userRecord.username === username && userRecord.password === password) {
+                    user = userRecord;
+                    return;
+                }
+            });
+            yield utils_1.AsyncTimer.sleep(500);
+            if (!user)
+                throw Error("User not found in excel sheet database");
+            return user;
         });
-        if (!user)
-            throw Error("User not found in excel sheet database");
-        return user;
     }
     // MARK: Connect to the XLSX Dummy DB 
     connect() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("connecting inside excel db");
             try {
                 this.s3 = new AWS.S3();
                 let res = yield this.s3.getObject(s3Params).promise();
-                // this.workbook = XLSX.readFile(__dirname + '/test-data/users_db.xlsx');
-                this.workbook = XLSX.read(res.Body);
+                const buffer = res.Body;
+                this.workbook = XLSX.read(buffer);
                 this.sheetNames = this.workbook.SheetNames;
             }
             catch (error) {
@@ -54,18 +56,22 @@ class ExcelSheetTestDatabase {
     disconnect() {
         console.log("disconnecting from excel test db");
     }
+    // MARK: Gets User Balance
     getBalance(user_id) {
-        // console.log(+user_id);
-        const userBalances = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[1]]);
-        let balance = -1;
-        userBalances.forEach((user) => {
-            if (user.user_id === +user_id) {
-                balance = user.balance;
-                return;
-            }
+        return __awaiter(this, void 0, void 0, function* () {
+            const userBalances = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[1]]);
+            let balance = -1;
+            userBalances.forEach((user) => {
+                if (user.user_id === +user_id) {
+                    balance = user.balance;
+                    return;
+                }
+            });
+            yield utils_1.AsyncTimer.sleep(500);
+            return balance;
         });
-        return balance;
     }
+    // MARK: Updates User Balance 
     updateBalance(uid, nb) {
         return __awaiter(this, void 0, void 0, function* () {
             let userID, newBalance;
@@ -83,8 +89,6 @@ class ExcelSheetTestDatabase {
             this.workbook.Sheets[this.sheetNames[1]] = ws;
             const buffer = XLSX.write(this.workbook, { type: "buffer" });
             yield this.s3.putObject(Object.assign(Object.assign({}, s3Params), { Body: buffer })).promise();
-            // Write out to the Excel Test Database 
-            // XLSX.writeFile(this.workbook, __dirname + '/test-data/users_db.xlsx'); 
         });
     }
     createNewArithmeticRecord(params) {
@@ -103,7 +107,6 @@ class ExcelSheetTestDatabase {
             records.push(newRecord);
             const updatedWS = XLSX.utils.json_to_sheet(records);
             this.workbook.Sheets[this.sheetNames[2]] = updatedWS;
-            // XLSX.writeFile(this.workbook, __dirname + '/test-data/users_db.xlsx'); 
             const buffer = XLSX.write(this.workbook, { type: "buffer" });
             yield this.s3.putObject(Object.assign(Object.assign({}, s3Params), { Body: buffer })).promise();
             return {};
@@ -118,10 +121,8 @@ class ExcelSheetTestDatabase {
     }
     // MARK: Query the database 
     query(q) {
-        console.log("quering the database");
-        let params = q.split(' ');
         let response = null;
-        console.log(params);
+        const params = q.split(' ');
         if (params.length >= 3) {
             const command = params[0];
             switch (command) {

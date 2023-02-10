@@ -1,6 +1,15 @@
+// MARK: Async Timer 
+class AsyncTimer {
+    static sleep(ms: number): Promise<any> {
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms); 
+        });
+    }
+}
+
 // MARK: Reponse Payload 
 class LambdaResponseGenerator {
-    static respond(statusCode: number, customHeader: string, data: any) {
+    static respond(statusCode: number, customHeader: string, data: any): object {
         const response = {
             statusCode,
             headers: {
@@ -26,4 +35,12 @@ class GenerateHashGenerator {
 }
 
 
-export { LambdaResponseGenerator, GenerateHashGenerator };
+// MARK: Generate a Random Integer from 0...n 
+class NumberGenerator {
+    static generate(max: number): number {
+        return Math.floor(Math.random() * max);
+    }
+}
+
+
+export { AsyncTimer, LambdaResponseGenerator, NumberGenerator, GenerateHashGenerator };
