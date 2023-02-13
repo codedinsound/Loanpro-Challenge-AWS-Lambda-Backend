@@ -1,6 +1,7 @@
 import boto3
 import io
 import abc
+import json 
 from openpyxl import load_workbook
 
 # ===============================================================
@@ -80,6 +81,24 @@ class ExcelSheetTestDatabase(Database):
         self.workbook.save(file_to_upload)
         file_to_upload.seek(0)
         self.s3.upload_fileobj(file_to_upload, "loanpro-challenge-aws-la-serverlessdeploymentbuck-1mo1bm3wp9e2s", "test-data/test3.xlsx")
+
+    def __get_user_transaction_records(self, user_id = ''):
+        print(user_id)
+        id = int(user_id)
+        res = {'status': 'failed', 'response': None}
+        user_records = []
+        for row in self.current_sheet.iter_rows(max_col=8, values_only=True):
+            if (row[2] == id and row[7] != 'T'):
+                user_records.append({
+                    'id': row[0],
+                    'operation_id': row[1],
+                    'date': row[6],
+                    'amount': row[3],
+                    'user_balance': row[4]
+                })
+        res['status'] = 'success'
+        res['response'] = user_records
+        return res 
             
     # Public Methods 
     def connect(self):
@@ -95,6 +114,7 @@ class ExcelSheetTestDatabase(Database):
         db_res = {'status': '', 'response': {}}
         queries = q.split()
         db_function_calls = {
+            'GET': self.__get_user_transaction_records,
             'SEARCH': self.__search,
             'SET_WORKSHEET': self.__set_worksheet,
             'UPDATE_WB': self.__update_workbook
@@ -104,16 +124,6 @@ class ExcelSheetTestDatabase(Database):
         else:
             db_res = {'status': 'failed', 'response': 'invalid query...'}
         return db_res 
-
-# MARK: Handle client deletion of record 
-def soft_delete_transaction_record(clientResponse, db = Database):
-    print("Soft Deleting Record")
-    db.query('SET_WORKSHEET UsersOperationsRecords')
-    res = db.query('SEARCH ' + str(clientResponse['record']['id']))
-    if (res['status'] == 'success'):
-        res['response']['record'][7].value = 'T'
-        db.query('UPDATE_WB _')
-
 
 # MARK: Check if client session token is valid
 def confirm_client_session_is_alive(userID, sessionToken): 
@@ -129,17 +139,47 @@ def confirm_valid_client_reponse(clientResponse):
         is_valid_response = confirm_client_session_is_alive(clientResponse['userID'], clientResponse['sessionToken'])
     return is_valid_response
 
+# MARK: Retrieve User Records from Workbook
+def retrieve_user_transaction_records(clientResponse, db = Database):
+    user_records = []
+    db.query('SET_WORKSHEET UsersOperationsRecords')
+    res = db.query('GET ' + str(clientResponse['userID']))
+    if (res['status'] == 'success'):
+        user_records = res['response']
+    return user_records
+
+# MARK: Handle client deletion of record 
+def soft_delete_transaction_record(clientResponse, db = Database):
+    print("Soft Deleting Record")
+    db.query('SET_WORKSHEET UsersOperationsRecords')
+    res = db.query('SEARCH ' + str(clientResponse['record']['id']))
+    if (res['status'] == 'success'):
+        res['response']['record'][7].value = 'T'
+        db.query('UPDATE_WB _')
+
 # MARK: AWS Lambda Handler 
 def lambda_handler(event, context):
     proceed = False 
     proceed = confirm_valid_client_reponse(event)
+    response = {}
     if (proceed): 
         db = DatabaseManagementController.instance().setDatabase(ExcelSheetTestDatabase())
         db.connect()
         soft_delete_transaction_record(event, db)
+        user_records = retrieve_user_transaction_records(event, db)
         db.disconnect()
-    
+        response = {
+            'statusCode': 200,
+            'body': json.dumps(user_records)
+        }
+    else:
+        response = {
+            'statusCode': 418, 
+            'body': {}
+        }
+    return response
 
-x = {'userID': 4, 'sessionToken': 'abc1', 'operation': 'DELETE_RECORD', 'record': {'id': '4-1', 'operation_id': 'INIT', 'date': '2023-02-12T03:57:31.986Z', 'amount': -1, 'user_balance': -1}}
-lambda_handler(x, '')
-
+# x = {'userID': 4, 'sessionToken': 'abc1', 'operation': 'DELETE_RECORD', 'record': {'id': '4-2', 'operation_id': 'ADD', 'date': '2023-02-12T03:57:31.986Z', 'amount': 5000
+# , 'user_balance': 97925}}
+# received_payload = lambda_handler(x, '')
+# print(received_payload)
