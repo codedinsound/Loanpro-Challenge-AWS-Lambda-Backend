@@ -16,7 +16,6 @@ export const authenticate = async(event: any, context: any) => {
 
 // MARK: Process User Arithmetic Operation Handler Lambda
 export const processUserArithmeticOperation = async(event: any, context: any) => {
-    console.log(21, event);
     if (!event.body) return LambdaResponseGenerator.respond(404, 'No params received', { error: "no parameters received..."}); 
     
     const body = JSON.parse(event.body); 

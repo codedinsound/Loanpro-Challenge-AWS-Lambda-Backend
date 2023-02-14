@@ -34,7 +34,6 @@ class GenerateHashGenerator {
     }
 }
 
-
 // MARK: Generate a Random Integer from 0...n 
 class NumberGenerator {
     static generate(max: number): number {

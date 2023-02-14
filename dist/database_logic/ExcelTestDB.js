@@ -91,9 +91,9 @@ class ExcelSheetTestDatabase {
             yield this.s3.putObject(Object.assign(Object.assign({}, s3Params), { Body: buffer })).promise();
         });
     }
+    // MARK: Create New Operations Record 
     createNewArithmeticRecord(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("ExcelTestDB.ts - 91: Creating new Record");
             const records = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[2]]);
             const newRecord = {
                 id: `${params[2]}-${records.length + 1}`,
@@ -102,7 +102,8 @@ class ExcelSheetTestDatabase {
                 amount: +params[8],
                 user_balance: +params[10],
                 operation_response: params[6],
-                date: `${new Date()}`
+                date: `${new Date()}`,
+                flag: 'F'
             };
             records.push(newRecord);
             const updatedWS = XLSX.utils.json_to_sheet(records);

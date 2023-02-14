@@ -106,8 +106,8 @@ class ExcelSheetTestDatabase implements Database {
         }).promise(); 
     }
 
+    // MARK: Create New Operations Record 
     async createNewArithmeticRecord(params: any) {
-        console.log("ExcelTestDB.ts - 91: Creating new Record");
         const records = XLSX.utils.sheet_to_json(this.workbook.Sheets[this.sheetNames[2]]);
 
         const newRecord = {
@@ -117,7 +117,8 @@ class ExcelSheetTestDatabase implements Database {
             amount: +params[8],
             user_balance: +params[10],
             operation_response: params[6],
-            date: `${new Date()}`
+            date: `${new Date()}`,
+            flag: 'F'
         }
 
         records.push(newRecord); 

@@ -86,3 +86,20 @@ Reponse Body </retrieveUserOperationsRecord>
     },
     .......... 
 ]
+
+# Soft Delete A User Record 
+
+Request Body 
+{
+    userID: string, 
+    sessionToken: string,
+    operation: string, 
+    record: {}
+}
+
+Response Body 
+
+{
+    statusCode: 200, 
+    body: [{}] 
+}

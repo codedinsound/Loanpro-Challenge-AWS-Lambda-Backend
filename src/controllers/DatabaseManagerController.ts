@@ -29,13 +29,13 @@ class DatabaseManagerController {
         return new Promise((resolve) => resolve(res)); 
     }
 
-   static instance(): DatabaseManagerController {
-        return new DatabaseManagerController(); 
-   }
-
    setDatabase(database: Database): Database {
         this.database = database; 
         return this; 
+   }
+
+   static instance(): DatabaseManagerController {
+        return new DatabaseManagerController(); 
    }
 }
 

@@ -1,4 +1,3 @@
-
 interface UserModel {
     id: number, 
     username: string, 
@@ -6,6 +5,5 @@ interface UserModel {
     status: string, 
     flagged: string
 }
-
 
 export { UserModel }

@@ -22,12 +22,12 @@ class DatabaseManagerController {
         }
         return new Promise((resolve) => resolve(res));
     }
-    static instance() {
-        return new DatabaseManagerController();
-    }
     setDatabase(database) {
         this.database = database;
         return this;
+    }
+    static instance() {
+        return new DatabaseManagerController();
     }
 }
 exports.DatabaseManagerController = DatabaseManagerController;

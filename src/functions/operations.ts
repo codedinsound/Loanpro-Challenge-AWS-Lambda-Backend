@@ -1,5 +1,5 @@
 import { DatabaseManagerController } from '../controllers';
-import { Database, ExcelSheetTestDatabase } from '../database_logic'; 
+import { ExcelSheetTestDatabase } from '../database_logic'; 
 import { MAX_LIMIT } from '../models';
 import { createArithmeticRecord } from './record_keeping_functions';
 
